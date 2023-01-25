@@ -1,12 +1,13 @@
 import { defineConfig, splitVendorChunkPlugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import glob from "glob";
-import { fileURLToPath } from "url";
+import reactRefresh from "@vitejs/plugin-react-refresh";
+import { viteSingleFile } from "vite-plugin-singlefile";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), splitVendorChunkPlugin()],
+  root: "./src",
+  plugins: [react(), reactRefresh(), viteSingleFile()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -15,26 +16,14 @@ export default defineConfig({
     },
   },
   build: {
-    target: ["es6"],
+    target: "esnext",
+    assetsInlineLimit: 100000000,
+    chunkSizeWarningLimit: 100000000,
+    cssCodeSplit: false,
+    outDir: "../dist",
     rollupOptions: {
-      input: {
-        plugins: "plugins/controller.ts",
-        ui: "src/main.tsx",
-        html: "index.html",
-      },
       output: {
-        assetFileNames: (assetInfo) => {
-          let extType = assetInfo.name.split(".")[1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
-            extType = "img";
-          }
-          return `assets/${extType}/[name]-[hash][extname]`;
-        },
-        entryFileNames: (entry) => {
-          console.log("entry", entry);
-          return "assets/js/[name].js";
-        },
-        chunkFileNames: "assets/js/[name].js",
+        inlineDynamicImports: true,
       },
     },
   },
